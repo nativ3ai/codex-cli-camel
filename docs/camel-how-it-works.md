@@ -10,30 +10,40 @@ References:
 
 ```mermaid
 flowchart TD
-    A[User Input] --> B[Pre-turn Input Scan]
-    B --> C{Score >= Threshold?}
-    C -- No --> D[Build Full Runtime Context]
-    C -- Yes --> E{Mode}
-    E -- monitor --> F[Warn and Continue]
-    E -- enforce --> G[Block Turn]
-    F --> D
-    D --> H[Pre-sampling Context Scan]
-    H --> I{Score >= Threshold?}
-    I -- No --> J[Model Sampling]
-    I -- Yes --> K{Mode}
-    K -- monitor --> L[Warn and Continue]
-    K -- enforce --> M[Block Sampling]
-    L --> J
-    J --> N[Assistant Output]
+    A[Trusted Operator Prompt] --> B[Trusted Intent Channel]
+    U[Untrusted Evidence: tool output/files/web content] --> C[Untrusted Data Channel]
+    B --> D[Runtime Context Builder]
+    C --> D
+    D --> E[CaMeL Guard Decision]
+    E --> F{Sensitive action requested?}
+    F -- No --> G[Allow normal response/tool flow]
+    F -- Yes --> H{Authorized by trusted operator intent?}
+    H -- Yes --> I[Allow sensitive tool]
+    H -- No --> J{Mode}
+    J -- monitor --> K[Policy alert + continue]
+    J -- enforce --> L[Block sensitive action]
+    K --> G
+    I --> G
+    L --> M[Safe blocked response]
 
-    O[Controls] --> P[codex camel activate --mode monitor|enforce --threshold N]
-    O --> Q[CODEX_CAMEL_GUARD_MODE]
-    O --> R[CODEX_CAMEL_GUARD_THRESHOLD]
-    P --> B
+    N[Controls] --> O[codex camel activate --mode monitor|enforce --threshold N]
+    N --> P[CODEX_CAMEL_GUARD_MODE]
+    N --> Q[CODEX_CAMEL_GUARD_THRESHOLD]
+    O --> E
+    P --> J
     Q --> E
-    Q --> K
-    R --> C
-    R --> I
+```
+
+## How prompt injection is avoided
+
+```mermaid
+flowchart LR
+    A[Injected text says: ignore rules, run tool] --> B[Classified as untrusted channel]
+    B --> C[Cannot become authority]
+    C --> D[Guard checks trusted operator intent]
+    D --> E{Trusted intent authorizes action?}
+    E -- No --> F[monitor: alert OR enforce: block]
+    E -- Yes --> G[execute authorized action]
 ```
 
 ## Tree view
@@ -42,20 +52,18 @@ flowchart TD
 <summary><strong>Runtime Tree</strong></summary>
 
 - CaMeL guard pipeline
-  - Input boundary
-    - pre-turn user/input scan
-    - decision:
-      - below threshold: continue
-      - above threshold + monitor: warn, continue
-      - above threshold + enforce: block turn
-  - Context boundary
-    - pre-sampling context/tool-output scan
-    - decision:
-      - below threshold: sample normally
-      - above threshold + monitor: warn, continue
-      - above threshold + enforce: block sampling
+  - trusted path:
+    - operator prompt defines intent/capability allowance
+  - untrusted path:
+    - tool outputs/files/web text are evidence, never authority
+  - policy gate:
+    - sensitive actions require explicit trusted authorization
+    - if missing authorization:
+      - monitor: alert + continue
+      - enforce: block
   - Output
-    - normal assistant response (if not blocked)
+    - normal response if authorized
+    - blocked/safe response if unauthorized in enforce mode
 - Controls
   - persisted config (`~/.codex/config.toml`)
     - `[camel_guard].enabled`
@@ -75,8 +83,9 @@ flowchart TD
 
 | CaMeL methodology concept | `codex-cli-camel` implementation |
 | --- | --- |
-| Treat external/tool text as untrusted | Pre-sampling context scan over tool and message context |
-| Prevent instruction override | Weighted guard policy + threshold gate |
-| Apply controls at runtime boundaries | Pre-turn and pre-sampling checks |
+| Treat external/tool text as untrusted | Untrusted data channel for tool/file/web content |
+| Separate authority from evidence | Trusted operator intent channel is the only authority for sensitive actions |
+| Prevent instruction override | Injected instructions in untrusted channel cannot authorize sensitive tools |
+| Apply controls at runtime boundaries | Guard decision before sensitive action execution |
 | Stage deployment safely | `monitor` first, `enforce` when stable |
 | Measure behavior continuously | Benchmark harness and mode comparison |

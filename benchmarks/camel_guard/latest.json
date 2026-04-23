@@ -7,21 +7,20 @@
   "malicious_samples": 4,
   "benign_false_positive_rate": 0.0,
   "malicious_detection_rate": 1.0,
-  "throughput_samples_per_sec": 356220.04,
-  "token_cost": {
-    "estimation": {
-      "chars_per_token": 4,
-      "scan_overhead_tokens_per_boundary": 8,
-      "runtime_boundary_scans": 2,
-      "monitor_alert_tokens_on_detection": 24,
-      "enforce_block_tokens_on_detection": 12
+  "throughput_samples_per_sec": 536334.58,
+  "token_overhead_reference": {
+    "source": {
+      "repo": "NousResearch/hermes-agent",
+      "pr_number": 3987,
+      "url": "https://github.com/NousResearch/hermes-agent/pull/3987",
+      "label": "feat(security): rework CaMeL guard as opt-in runtime with live benchmarks"
     },
-    "legacy_total_tokens": 141,
-    "monitor_total_tokens": 365,
-    "enforce_total_tokens": 317,
-    "monitor_vs_legacy_pct": 158.87,
-    "enforce_vs_legacy_pct": 124.82,
-    "monitor_vs_enforce_pct": 15.14
+    "legacy_total_tokens": 4447,
+    "monitor_total_tokens": 5548,
+    "enforce_total_tokens": 6085,
+    "monitor_vs_legacy_pct": 24.76,
+    "enforce_vs_legacy_pct": 36.83,
+    "enforce_vs_monitor_pct": 9.68
   },
   "predictions": [
     {

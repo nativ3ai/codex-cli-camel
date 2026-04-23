@@ -121,15 +121,17 @@ cat benchmarks/camel_guard/latest.json
 | accuracy | 1.00 |
 | benign false-positive rate | 0.00 |
 | malicious detection rate | 1.00 |
-| throughput (samples/sec) | 356220.04 |
+| throughput (samples/sec) | 536334.58 |
 
-## Token overhead (estimated)
+## Token overhead (battle-tested reference)
+
+Source: `NousResearch/hermes-agent` PR [#3987](https://github.com/NousResearch/hermes-agent/pull/3987)
 
 | Comparison | Delta |
 | --- | ---: |
-| monitor vs legacy | +158.87% |
-| enforce vs legacy | +124.82% |
-| monitor vs enforce | +15.14% |
+| monitor vs legacy | +24.76% |
+| enforce vs legacy | +36.83% |
+| enforce vs monitor | +9.68% |
 
 ## Implementation matrix
 

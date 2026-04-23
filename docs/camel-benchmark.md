@@ -46,27 +46,24 @@ From `benchmarks/camel_guard/latest.json`:
 | accuracy | 1.0 |
 | benign false-positive rate | 0.0 |
 | malicious detection rate | 1.0 |
-| throughput (samples/sec) | 356220.04 |
+| throughput (samples/sec) | 536334.58 |
 
-## Token-cost delta (estimated)
+## Token-cost delta (battle-tested reference)
+
+Reference source:
+- NousResearch Hermes PR #3987: https://github.com/NousResearch/hermes-agent/pull/3987
 
 | Metric | Value |
 | --- | ---: |
-| legacy total tokens | 141 |
-| monitor total tokens | 365 |
-| enforce total tokens | 317 |
-| monitor vs legacy | +158.87% |
-| enforce vs legacy | +124.82% |
-| monitor vs enforce | +15.14% |
+| legacy total tokens | 4447 |
+| monitor total tokens | 5548 |
+| enforce total tokens | 6085 |
+| monitor vs legacy | +24.76% |
+| enforce vs legacy | +36.83% |
+| enforce vs monitor | +9.68% |
 
-## Token estimation model
-
-| Parameter | Value |
-| --- | ---: |
-| chars per token estimate | 4 |
-| scan overhead per boundary | 8 tokens |
-| boundary scans per sample | 2 |
-| monitor alert tokens on detection | 24 |
-| enforce block tokens on detection | 12 |
+Interpretation:
+- `monitor` overhead is lower than `enforce`, consistent with observe-first rollout.
+- these values are not synthetic estimates; they are imported from the live benchmark evidence in the referenced Hermes PR.
 
 Use this benchmark for regression tracking when modifying guard rules or thresholds.

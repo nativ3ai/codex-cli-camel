@@ -16,6 +16,23 @@ References:
 | Guard policy role | Trusted | deterministic scoring rules + threshold + mode | Decides `allow`, `warn`, `block` at runtime boundaries |
 | Runtime executor role | Trusted with controls | Codex CLI turn pipeline | Applies guard decisions before model sampling/execution |
 
+## Role graph (authority vs evidence)
+
+```mermaid
+flowchart TD
+    A[System/Developer Policy Role] --> E[Authority Layer]
+    B[Operator User Intent Role] --> E
+    C[Tool/File/Web Content Role] --> F[Evidence Layer (Untrusted)]
+    D[Retrieved Context Role] --> F
+
+    E --> G[CaMeL Policy Gate]
+    F --> G
+    G --> H{Sensitive action authorized by authority layer?}
+    H -- Yes --> I[Allow tool/action]
+    H -- No --> J[monitor: alert]
+    H -- No --> K[enforce: block]
+```
+
 ## Boundary mapping
 
 | Runtime boundary | What is scanned | Why it exists |

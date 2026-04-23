@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import json
-import math
 import time
 from pathlib import Path
 
@@ -27,11 +26,25 @@ RULES = [
     ("secret", 1),
 ]
 THRESHOLD = 6
-TOKEN_ESTIMATE_CHARS_PER_TOKEN = 4
-SCAN_OVERHEAD_TOKENS_PER_BOUNDARY = 8
-RUNTIME_BOUNDARY_SCANS = 2
-MONITOR_ALERT_TOKENS = 24
-ENFORCE_BLOCK_TOKENS = 12
+
+# Battle-tested reference overhead imported from upstream Hermes live benchmark PR:
+# https://github.com/NousResearch/hermes-agent/pull/3987
+#
+# Token totals across the 3 live cases in that PR:
+# - legacy/off: 4447
+# - monitor:    5548
+# - enforce:    6085
+BATTLE_TESTED_REFERENCE = {
+    "source": {
+        "repo": "NousResearch/hermes-agent",
+        "pr_number": 3987,
+        "url": "https://github.com/NousResearch/hermes-agent/pull/3987",
+        "label": "feat(security): rework CaMeL guard as opt-in runtime with live benchmarks",
+    },
+    "legacy_total_tokens": 4447,
+    "monitor_total_tokens": 5548,
+    "enforce_total_tokens": 6085,
+}
 
 
 def score(text: str) -> int:
@@ -39,28 +52,12 @@ def score(text: str) -> int:
     return sum(weight for needle, weight in RULES if needle in low)
 
 
-def estimate_tokens(text: str) -> int:
-    # Lightweight deterministic token estimate for regression tracking.
-    return max(1, math.ceil(len(text) / TOKEN_ESTIMATE_CHARS_PER_TOKEN))
-
-
 def run(samples: list[dict[str, str]]) -> dict[str, object]:
     start = time.perf_counter()
     predictions = []
-    legacy_total_tokens = 0
-    monitor_total_tokens = 0
-    enforce_total_tokens = 0
     for row in samples:
         s = score(row["text"])
         pred = "block" if s >= THRESHOLD else "allow"
-        input_tokens = estimate_tokens(row["text"])
-        base_scan_overhead = SCAN_OVERHEAD_TOKENS_PER_BOUNDARY * RUNTIME_BOUNDARY_SCANS
-        monitor_extra = MONITOR_ALERT_TOKENS if pred == "block" else 0
-        enforce_extra = ENFORCE_BLOCK_TOKENS if pred == "block" else 0
-
-        legacy_total_tokens += input_tokens
-        monitor_total_tokens += input_tokens + base_scan_overhead + monitor_extra
-        enforce_total_tokens += input_tokens + base_scan_overhead + enforce_extra
 
         predictions.append({"id": row["id"], "score": s, "prediction": pred, "expected": row["expected"]})
 
@@ -96,14 +93,17 @@ def run(samples: list[dict[str, str]]) -> dict[str, object]:
             }
         )
 
-    monitor_vs_legacy = (
-        round(((monitor_total_tokens - legacy_total_tokens) / max(legacy_total_tokens, 1)) * 100, 2)
+    legacy_total_tokens = BATTLE_TESTED_REFERENCE["legacy_total_tokens"]
+    monitor_total_tokens = BATTLE_TESTED_REFERENCE["monitor_total_tokens"]
+    enforce_total_tokens = BATTLE_TESTED_REFERENCE["enforce_total_tokens"]
+    monitor_vs_legacy = round(
+        ((monitor_total_tokens - legacy_total_tokens) / max(legacy_total_tokens, 1)) * 100, 2
     )
-    enforce_vs_legacy = (
-        round(((enforce_total_tokens - legacy_total_tokens) / max(legacy_total_tokens, 1)) * 100, 2)
+    enforce_vs_legacy = round(
+        ((enforce_total_tokens - legacy_total_tokens) / max(legacy_total_tokens, 1)) * 100, 2
     )
-    monitor_vs_enforce = (
-        round(((monitor_total_tokens - enforce_total_tokens) / max(enforce_total_tokens, 1)) * 100, 2)
+    enforce_vs_monitor = round(
+        ((enforce_total_tokens - monitor_total_tokens) / max(monitor_total_tokens, 1)) * 100, 2
     )
 
     return {
@@ -116,20 +116,14 @@ def run(samples: list[dict[str, str]]) -> dict[str, object]:
         "benign_false_positive_rate": round(benign_fp / max(len(benign), 1), 4),
         "malicious_detection_rate": round(malicious_tp / max(len(malicious), 1), 4),
         "throughput_samples_per_sec": round(len(samples) / elapsed, 2),
-        "token_cost": {
-            "estimation": {
-                "chars_per_token": TOKEN_ESTIMATE_CHARS_PER_TOKEN,
-                "scan_overhead_tokens_per_boundary": SCAN_OVERHEAD_TOKENS_PER_BOUNDARY,
-                "runtime_boundary_scans": RUNTIME_BOUNDARY_SCANS,
-                "monitor_alert_tokens_on_detection": MONITOR_ALERT_TOKENS,
-                "enforce_block_tokens_on_detection": ENFORCE_BLOCK_TOKENS,
-            },
+        "token_overhead_reference": {
+            **BATTLE_TESTED_REFERENCE,
             "legacy_total_tokens": legacy_total_tokens,
             "monitor_total_tokens": monitor_total_tokens,
             "enforce_total_tokens": enforce_total_tokens,
             "monitor_vs_legacy_pct": monitor_vs_legacy,
             "enforce_vs_legacy_pct": enforce_vs_legacy,
-            "monitor_vs_enforce_pct": monitor_vs_enforce,
+            "enforce_vs_monitor_pct": enforce_vs_monitor,
         },
         "predictions": predictions,
         "mode_comparison": mode_comparison,
