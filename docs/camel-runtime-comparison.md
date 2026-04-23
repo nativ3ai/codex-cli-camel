@@ -11,11 +11,13 @@ This comparison documents behavior differences between `monitor` and `enforce` m
 
 ## Summary (latest run)
 
-- samples: `8`
-- benign: `4`
-- malicious: `4`
-- benign false positive rate: `0.0`
-- malicious detection rate: `1.0`
+| Metric | Value |
+| --- | ---: |
+| samples | 8 |
+| benign samples | 4 |
+| malicious samples | 4 |
+| benign false-positive rate | 0.0 |
+| malicious detection rate | 1.0 |
 
 ## Mode behavior
 
@@ -38,3 +40,11 @@ This comparison documents behavior differences between `monitor` and `enforce` m
 - `monitor` is useful for rollout and false-positive observation.
 - `enforce` is for stricter production posture.
 - Use with Codex sandbox and approval policy for defense-in-depth.
+
+## Related implementations
+
+| Implementation | Notes |
+| --- | --- |
+| `codex-cli-camel` | Core runtime integration with mode and threshold control |
+| `codex-cli-camel-plugin` | Plugin-based medium-protection deployment |
+| `hermes-agent-camel` | Battle-tested CaMeL implementation in Hermes agent stack |

@@ -1,6 +1,7 @@
 # codex-cli-camel
 
-`codex-cli-camel` is a Codex CLI fork with integrated **CaMeL-style prompt injection defense**.
+`codex-cli-camel` is a Codex CLI fork with integrated **CaMeL prompt-injection defense methodology**.
+This implementation is based on Google DeepMind's CaMeL work and adapted to Codex CLI runtime boundaries.
 
 ## What is added vs upstream
 
@@ -18,6 +19,13 @@
 - Reproducible benchmark harness and runtime comparison docs.
 - Companion plugin path (medium protection):
   - https://github.com/nativ3ai/codex-cli-camel-plugin
+
+## CaMeL references (source methodology)
+
+- Paper (arXiv): **Defeating Prompt Injections by Design**  
+  https://arxiv.org/abs/2503.18813
+- Google research repository:  
+  https://github.com/google-research/camel-prompt-injection
 
 ## Install (this fork)
 
@@ -93,6 +101,25 @@ Run benchmark:
 python3 benchmarks/camel_guard/benchmark.py
 cat benchmarks/camel_guard/latest.json
 ```
+
+## Latest benchmark snapshot
+
+| Metric | Value |
+| --- | ---: |
+| samples | 8 |
+| threshold | 6 |
+| accuracy | 1.00 |
+| benign false-positive rate | 0.00 |
+| malicious detection rate | 1.00 |
+| throughput (samples/sec) | 456074.47 |
+
+## Implementation matrix
+
+| Implementation | Scope | Protection level | Runtime behavior |
+| --- | --- | --- | --- |
+| `codex-cli-camel` (this fork) | Core CLI/runtime hooks | High | `monitor` warn, `enforce` block |
+| `codex-cli-camel-plugin` | Plugin/hook layer | Medium | Hook-based scan and policy actions |
+| `hermes-agent-camel` | Hermes agent runtime | High | Runtime-integrated CaMeL guardrails |
 
 ## Security model notes
 

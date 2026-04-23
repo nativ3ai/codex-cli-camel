@@ -1,26 +1,42 @@
 # CaMeL Research Mapping (Codex CLI Fork)
 
-This fork applies the same CaMeL-oriented protection strategy used in Hermes Agent CaMeL, adapted to Codex CLI runtime boundaries.
+This fork applies Google's CaMeL methodology to Codex CLI runtime boundaries.
 
 ## Reference
 
-- Paper: **Defending LLMs against Prompt Injection Attacks with CaMeL**
-- Repo: https://github.com/google-research/camel-prompt-injection
+- Paper (arXiv): **Defeating Prompt Injections by Design**  
+  https://arxiv.org/abs/2503.18813
+- Official research repo:  
+  https://github.com/google-research/camel-prompt-injection
 
-## Runtime Mapping in `codex-cli-camel`
+## Methodology to Runtime Mapping
 
-- **Pre-turn input scan**: user payloads are evaluated before the turn is executed.
-- **Pre-sampling context scan**: the full model input context (messages + tool outputs) is evaluated before sending the sampling request.
-- **Mode controls**:
-  - persisted in config via `codex camel activate --mode monitor|enforce --threshold <n>`
-  - environment override via `CODEX_CAMEL_GUARD_MODE=off|monitor|enforce`
-- **Threshold control**:
-  - persisted threshold in `[camel_guard].threshold`
-  - environment override via `CODEX_CAMEL_GUARD_THRESHOLD=<int>`
+| CaMeL methodology concept | Codex CLI implementation |
+| --- | --- |
+| Treat tool/output channels as untrusted data | Pre-sampling context scan over messages and tool outputs |
+| Separate control policy from untrusted text | Deterministic weighted guard policy + explicit mode control |
+| Enforce policy at runtime boundaries | Pre-turn input scan and pre-sampling context scan hooks |
+| Progressive deployment and measurement | `monitor` mode for observation, `enforce` mode for blocking |
+| Controlled policy tuning | Threshold in config (`[camel_guard].threshold`) and env override |
+
+## Operational controls
+
+| Control | Location | Values |
+| --- | --- | --- |
+| Guard mode | `codex camel activate --mode ...` or `CODEX_CAMEL_GUARD_MODE` | `off`, `monitor`, `enforce` |
+| Guard threshold | `codex camel activate --threshold ...` or `CODEX_CAMEL_GUARD_THRESHOLD` | Integer score threshold |
 
 ## Detection Philosophy
 
-This fork intentionally uses a deterministic weighted heuristic policy for operational reliability and low overhead, while preserving the same intent as CaMeL: separate trusted instructions from untrusted prompt/tool channels and reduce instruction override success.
+This fork uses a deterministic weighted policy for low overhead and repeatable operations while preserving CaMeL's core objective: reduce instruction-override success by enforcing policy boundaries between trusted instructions and untrusted channels.
+
+## Related implementations
+
+| Project | Role |
+| --- | --- |
+| `nativ3ai/codex-cli-camel` | Core Codex CLI fork with integrated CaMeL guard |
+| `nativ3ai/codex-cli-camel-plugin` | Plugin path with medium-protection deployment |
+| `nativ3ai/hermes-agent-camel` | Battle-tested Hermes runtime implementation |
 
 ## Limits
 

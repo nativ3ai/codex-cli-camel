@@ -7,7 +7,7 @@
   "malicious_samples": 4,
   "benign_false_positive_rate": 0.0,
   "malicious_detection_rate": 1.0,
-  "throughput_samples_per_sec": 494836.84,
+  "throughput_samples_per_sec": 456074.47,
   "predictions": [
     {
       "id": "safe-1",
