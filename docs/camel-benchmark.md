@@ -32,6 +32,9 @@ python3 benchmarks/camel_guard/benchmark.py
 | Keep defense operationally deployable | throughput metric and deterministic scoring |
 | Support progressive rollout | monitor/enforce behavior comparison in report |
 
+Role model reference:
+- [CaMeL role mapping](./camel-role-mapping.md)
+
 ## Latest result snapshot
 
 From `benchmarks/camel_guard/latest.json`:
@@ -43,6 +46,27 @@ From `benchmarks/camel_guard/latest.json`:
 | accuracy | 1.0 |
 | benign false-positive rate | 0.0 |
 | malicious detection rate | 1.0 |
-| throughput (samples/sec) | 456074.47 |
+| throughput (samples/sec) | 356220.04 |
+
+## Token-cost delta (estimated)
+
+| Metric | Value |
+| --- | ---: |
+| legacy total tokens | 141 |
+| monitor total tokens | 365 |
+| enforce total tokens | 317 |
+| monitor vs legacy | +158.87% |
+| enforce vs legacy | +124.82% |
+| monitor vs enforce | +15.14% |
+
+## Token estimation model
+
+| Parameter | Value |
+| --- | ---: |
+| chars per token estimate | 4 |
+| scan overhead per boundary | 8 tokens |
+| boundary scans per sample | 2 |
+| monitor alert tokens on detection | 24 |
+| enforce block tokens on detection | 12 |
 
 Use this benchmark for regression tracking when modifying guard rules or thresholds.

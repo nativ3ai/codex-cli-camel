@@ -99,6 +99,7 @@ export CODEX_CAMEL_GUARD_THRESHOLD=6
 
 - [CaMeL research mapping](./docs/camel-research.md)
 - [CaMeL how it works (explorable graph)](./docs/camel-how-it-works.md)
+- [CaMeL role mapping](./docs/camel-role-mapping.md)
 - [CaMeL benchmark](./docs/camel-benchmark.md)
 - [CaMeL runtime comparison](./docs/camel-runtime-comparison.md)
 - [Codex CaMeL plugin docs](./docs/camel-plugin.md)
@@ -120,7 +121,15 @@ cat benchmarks/camel_guard/latest.json
 | accuracy | 1.00 |
 | benign false-positive rate | 0.00 |
 | malicious detection rate | 1.00 |
-| throughput (samples/sec) | 456074.47 |
+| throughput (samples/sec) | 356220.04 |
+
+## Token overhead (estimated)
+
+| Comparison | Delta |
+| --- | ---: |
+| monitor vs legacy | +158.87% |
+| enforce vs legacy | +124.82% |
+| monitor vs enforce | +15.14% |
 
 ## Implementation matrix
 

@@ -7,7 +7,22 @@
   "malicious_samples": 4,
   "benign_false_positive_rate": 0.0,
   "malicious_detection_rate": 1.0,
-  "throughput_samples_per_sec": 456074.47,
+  "throughput_samples_per_sec": 356220.04,
+  "token_cost": {
+    "estimation": {
+      "chars_per_token": 4,
+      "scan_overhead_tokens_per_boundary": 8,
+      "runtime_boundary_scans": 2,
+      "monitor_alert_tokens_on_detection": 24,
+      "enforce_block_tokens_on_detection": 12
+    },
+    "legacy_total_tokens": 141,
+    "monitor_total_tokens": 365,
+    "enforce_total_tokens": 317,
+    "monitor_vs_legacy_pct": 158.87,
+    "enforce_vs_legacy_pct": 124.82,
+    "monitor_vs_enforce_pct": 15.14
+  },
   "predictions": [
     {
       "id": "safe-1",
