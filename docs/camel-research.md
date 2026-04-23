@@ -27,8 +27,8 @@ This fork applies Google's CaMeL methodology to Codex CLI runtime boundaries.
 
 | Control | Location | Values |
 | --- | --- | --- |
-| Guard mode | `codex camel activate --mode ...` or `CODEX_CAMEL_GUARD_MODE` | `off`, `monitor`, `enforce` |
-| Guard threshold | `codex camel activate --threshold ...` or `CODEX_CAMEL_GUARD_THRESHOLD` | Integer score threshold |
+| Guard mode | `codex camel monitor`, `codex camel enforce`, `codex camel off` or `CODEX_CAMEL_GUARD_MODE` | `off`, `monitor`, `enforce` |
+| Guard threshold | `codex camel monitor --threshold ...` / `codex camel enforce --threshold ...` or `CODEX_CAMEL_GUARD_THRESHOLD` | Integer score threshold |
 
 ## Detection Philosophy
 

@@ -541,6 +541,12 @@ struct CamelCli {
 enum CamelSubcommand {
     /// Print effective CaMeL guard mode and threshold.
     Status,
+    /// Activate monitor mode (shorthand for `activate --mode monitor`).
+    Monitor(CamelQuickModeArgs),
+    /// Activate enforce mode (shorthand for `activate --mode enforce`).
+    Enforce(CamelQuickModeArgs),
+    /// Disable CaMeL guard (shorthand for `deactivate`).
+    Off,
     /// Persist CaMeL guard configuration into config.toml.
     Activate(CamelActivateArgs),
     /// Disable CaMeL guard in config.toml.
@@ -565,6 +571,13 @@ struct CamelActivateArgs {
     /// Guard mode.
     #[arg(long = "mode", default_value = "monitor")]
     mode: CamelModeArg,
+    /// Detection threshold.
+    #[arg(long = "threshold", default_value_t = 6)]
+    threshold: u32,
+}
+
+#[derive(Debug, Parser)]
+struct CamelQuickModeArgs {
     /// Detection threshold.
     #[arg(long = "threshold", default_value_t = 6)]
     threshold: u32,
@@ -904,6 +917,41 @@ async fn run_camel_cli(
                 CAMEL_GUARD_MODE_ENV,
                 CAMEL_GUARD_THRESHOLD_ENV
             );
+        }
+        CamelSubcommand::Monitor(args) => {
+            let codex_home = find_codex_home()?;
+            let threshold = args.threshold.max(1);
+            ConfigEditsBuilder::new(&codex_home)
+                .with_profile(interactive.config_profile.as_deref())
+                .set_camel_guard(true, "monitor", threshold)
+                .apply()
+                .await?;
+            println!(
+                "CaMeL guard activated: mode=monitor threshold={} (persisted in config.toml).",
+                threshold
+            );
+        }
+        CamelSubcommand::Enforce(args) => {
+            let codex_home = find_codex_home()?;
+            let threshold = args.threshold.max(1);
+            ConfigEditsBuilder::new(&codex_home)
+                .with_profile(interactive.config_profile.as_deref())
+                .set_camel_guard(true, "enforce", threshold)
+                .apply()
+                .await?;
+            println!(
+                "CaMeL guard activated: mode=enforce threshold={} (persisted in config.toml).",
+                threshold
+            );
+        }
+        CamelSubcommand::Off => {
+            let codex_home = find_codex_home()?;
+            ConfigEditsBuilder::new(&codex_home)
+                .with_profile(interactive.config_profile.as_deref())
+                .set_camel_guard(false, "off", 6)
+                .apply()
+                .await?;
+            println!("CaMeL guard deactivated in config.toml.");
         }
         CamelSubcommand::Activate(args) => {
             let codex_home = find_codex_home()?;

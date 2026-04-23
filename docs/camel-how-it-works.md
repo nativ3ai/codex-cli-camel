@@ -26,7 +26,7 @@ flowchart TD
     I --> G
     L --> M[Safe blocked response]
 
-    N[Controls] --> O[codex camel activate --mode monitor|enforce --threshold N]
+    N[Controls] --> O[codex camel monitor-or-enforce --threshold N]
     N --> P[CODEX_CAMEL_GUARD_MODE]
     N --> Q[CODEX_CAMEL_GUARD_THRESHOLD]
     O --> E

@@ -42,7 +42,7 @@ codex --help
 ### CaMeL quickstart
 
 ```bash
-codex camel activate --mode monitor --threshold 6
+codex camel monitor --threshold 6
 codex camel status
 codex camel compare
 ```

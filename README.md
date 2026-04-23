@@ -11,8 +11,9 @@ This implementation is based on Google DeepMind's CaMeL work and adapted to Code
   - `monitor` (warn, continue)
   - `enforce` (block suspicious turn)
 - CLI commands:
-  - `codex camel activate --mode monitor|enforce --threshold <n>`
-  - `codex camel deactivate`
+  - `codex camel monitor --threshold <n>`
+  - `codex camel enforce --threshold <n>`
+  - `codex camel off`
   - `codex camel status`
   - `codex camel scan "<payload>"`
   - `codex camel compare`
@@ -47,7 +48,7 @@ flowchart TD
     I --> G
     L --> M[Safe blocked response]
 
-    N[Control knobs] --> O[codex camel activate --mode monitor-or-enforce --threshold N]
+    N[Control knobs] --> O[codex camel monitor-or-enforce --threshold N]
     N --> P[CODEX_CAMEL_GUARD_MODE]
     N --> Q[CODEX_CAMEL_GUARD_THRESHOLD]
     O --> E
@@ -92,16 +93,17 @@ codex --help
 ## Activate guard
 
 ```bash
-# Persist guard in ~/.codex/config.toml
-codex camel activate --mode monitor --threshold 6
+# Simple mode commands (persist in ~/.codex/config.toml)
+codex camel monitor --threshold 6
+codex camel enforce --threshold 6
+codex camel off
 
 # Check effective settings (env vars override config)
 codex camel status
 
-# Switch to strict enforcement
+# Legacy equivalent syntax is still supported:
+codex camel activate --mode monitor --threshold 6
 codex camel activate --mode enforce --threshold 6
-
-# Disable
 codex camel deactivate
 ```
 

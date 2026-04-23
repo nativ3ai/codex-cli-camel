@@ -18,7 +18,7 @@ cargo run -p codex-cli --
 ## 2. Enable CaMeL guard
 
 ```bash
-codex camel activate --mode monitor --threshold 6
+codex camel monitor --threshold 6
 codex camel status
 ```
 
@@ -32,11 +32,11 @@ python3 ../benchmarks/camel_guard/benchmark.py
 ## 4. Move to enforcement
 
 ```bash
-codex camel activate --mode enforce --threshold 6
+codex camel enforce --threshold 6
 ```
 
 If needed, disable quickly:
 
 ```bash
-codex camel deactivate
+codex camel off
 ```
