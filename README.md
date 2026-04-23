@@ -29,6 +29,13 @@ This implementation is based on Google DeepMind's CaMeL work and adapted to Code
 
 ## Install (this fork)
 
+### npm (global, one line)
+
+```bash
+npm install -g codex-camel
+codex --version
+```
+
 ### Build from source
 
 ```bash
@@ -91,9 +98,11 @@ export CODEX_CAMEL_GUARD_THRESHOLD=6
 ## Benchmarks and research docs
 
 - [CaMeL research mapping](./docs/camel-research.md)
+- [CaMeL how it works (explorable graph)](./docs/camel-how-it-works.md)
 - [CaMeL benchmark](./docs/camel-benchmark.md)
 - [CaMeL runtime comparison](./docs/camel-runtime-comparison.md)
 - [Codex CaMeL plugin docs](./docs/camel-plugin.md)
+- [npm release guide (`codex-camel`)](./docs/npm-release.md)
 
 Run benchmark:
 

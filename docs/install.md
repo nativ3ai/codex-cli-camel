@@ -2,6 +2,13 @@
 
 This page is for the **fork** at `nativ3ai/codex-cli-camel`.
 
+### One-line npm install (global)
+
+```bash
+npm install -g codex-camel
+codex --version
+```
+
 ### System requirements
 
 | Requirement                 | Details                                                          |

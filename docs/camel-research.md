@@ -8,6 +8,8 @@ This fork applies Google's CaMeL methodology to Codex CLI runtime boundaries.
   https://arxiv.org/abs/2503.18813
 - Official research repo:  
   https://github.com/google-research/camel-prompt-injection
+- Runtime flow graph:  
+  ./camel-how-it-works.md
 
 ## Methodology to Runtime Mapping
 

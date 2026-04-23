@@ -1,6 +1,13 @@
 # Getting started with codex-cli-camel
 
-## 1. Build and run
+## 1. Install and run
+
+```bash
+npm install -g codex-camel
+codex --help
+```
+
+Alternative (from source):
 
 ```bash
 git clone https://github.com/nativ3ai/codex-cli-camel.git
