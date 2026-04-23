@@ -12,14 +12,23 @@
 python3 benchmarks/camel_guard/benchmark.py
 ```
 
-## Metrics captured
+## Reported metrics
 
 - sample count
 - threshold
-- classification accuracy (`allow`/`block`)
-- blocked sample count
+- classification accuracy (`allow` vs `block`)
+- benign false-positive rate
+- malicious detection rate
 - throughput (samples/sec)
+- monitor/enforce mode comparison table
 
-## Notes
+## Latest result snapshot
 
-This benchmark is deterministic and intended for regression tracking in CI/PR review. It does not replace live-model security evaluation.
+From `benchmarks/camel_guard/latest.json`:
+
+- samples: `8`
+- accuracy: `1.0`
+- benign false-positive rate: `0.0`
+- malicious detection rate: `1.0`
+
+Use this benchmark for regression tracking when modifying guard rules or thresholds.

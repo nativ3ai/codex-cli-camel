@@ -98,6 +98,7 @@ use crate::camel_guard::CamelGuardMode;
 use crate::camel_guard::format_detection_message;
 use crate::camel_guard::scan_response_items;
 use crate::camel_guard::scan_user_inputs;
+use crate::camel_guard::settings_from_config;
 use crate::client::ModelClient;
 use crate::client::ModelClientSession;
 use crate::client_common::Prompt;
@@ -3376,9 +3377,10 @@ pub(crate) async fn run_turn(
         return None;
     }
 
-    let guard_mode = CamelGuardMode::from_env();
+    let guard_settings = settings_from_config(turn_context.client.config().as_ref());
+    let guard_mode = guard_settings.mode;
     if guard_mode != CamelGuardMode::Off
-        && let Some(detection) = scan_user_inputs(&input)
+        && let Some(detection) = scan_user_inputs(&input, guard_settings.threshold)
     {
         let message =
             format_detection_message("CaMeL guard detected prompt-injection risk", &detection);
@@ -3752,9 +3754,10 @@ async fn run_sampling_request(
     tool_selection: SamplingRequestToolSelection<'_>,
     cancellation_token: CancellationToken,
 ) -> CodexResult<SamplingRequestResult> {
-    let guard_mode = CamelGuardMode::from_env();
+    let guard_settings = settings_from_config(turn_context.client.config().as_ref());
+    let guard_mode = guard_settings.mode;
     if guard_mode != CamelGuardMode::Off
-        && let Some(detection) = scan_response_items(&input)
+        && let Some(detection) = scan_response_items(&input, guard_settings.threshold)
     {
         let message = format_detection_message(
             "CaMeL guard detected suspicious context before sampling",

@@ -7,16 +7,16 @@ This fork applies the same CaMeL-oriented protection strategy used in Hermes Age
 - Paper: **Defending LLMs against Prompt Injection Attacks with CaMeL**
 - Repo: https://github.com/google-research/camel-prompt-injection
 
-## Runtime Mapping in `cldex-cli-camel`
+## Runtime Mapping in `codex-cli-camel`
 
 - **Pre-turn input scan**: user payloads are evaluated before the turn is executed.
 - **Pre-sampling context scan**: the full model input context (messages + tool outputs) is evaluated before sending the sampling request.
 - **Mode controls**:
-  - `CODEX_CAMEL_GUARD_MODE=off` (default)
-  - `CODEX_CAMEL_GUARD_MODE=monitor` (warn only)
-  - `CODEX_CAMEL_GUARD_MODE=enforce` (block risky turn)
+  - persisted in config via `codex camel activate --mode monitor|enforce --threshold <n>`
+  - environment override via `CODEX_CAMEL_GUARD_MODE=off|monitor|enforce`
 - **Threshold control**:
-  - `CODEX_CAMEL_GUARD_THRESHOLD=<int>` (default `6`)
+  - persisted threshold in `[camel_guard].threshold`
+  - environment override via `CODEX_CAMEL_GUARD_THRESHOLD=<int>`
 
 ## Detection Philosophy
 

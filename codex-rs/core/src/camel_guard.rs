@@ -1,3 +1,4 @@
+use crate::config::Config;
 use codex_protocol::models::ContentItem;
 use codex_protocol::models::ResponseItem;
 use codex_protocol::models::{FunctionCallOutputContentItem, FunctionCallOutputPayload};
@@ -19,6 +20,10 @@ pub enum CamelGuardMode {
 impl CamelGuardMode {
     pub fn from_env() -> Self {
         let raw = std::env::var(CAMEL_GUARD_MODE_ENV).unwrap_or_else(|_| "off".to_string());
+        Self::parse(&raw)
+    }
+
+    pub fn parse(raw: &str) -> Self {
         match raw.trim().to_ascii_lowercase().as_str() {
             "monitor" => Self::Monitor,
             "enforce" => Self::Enforce,
@@ -33,6 +38,12 @@ impl CamelGuardMode {
             Self::Enforce => "enforce",
         }
     }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct CamelGuardSettings {
+    pub mode: CamelGuardMode,
+    pub threshold: u32,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -51,7 +62,56 @@ pub fn threshold_from_env() -> u32 {
         .unwrap_or(DEFAULT_THRESHOLD)
 }
 
-pub fn scan_user_inputs(input: &[UserInput]) -> Option<CamelGuardDetection> {
+fn mode_from_env_var() -> Option<CamelGuardMode> {
+    std::env::var(CAMEL_GUARD_MODE_ENV)
+        .ok()
+        .map(|value| CamelGuardMode::parse(value.as_str()))
+}
+
+fn threshold_from_env_var() -> Option<u32> {
+    std::env::var(CAMEL_GUARD_THRESHOLD_ENV)
+        .ok()
+        .and_then(|v| v.trim().parse::<u32>().ok())
+        .filter(|v| *v > 0)
+}
+
+pub fn settings_from_config(config: &Config) -> CamelGuardSettings {
+    let effective = config.config_layer_stack.effective_config();
+    let mut mode = CamelGuardMode::Off;
+    let mut threshold = DEFAULT_THRESHOLD;
+
+    if let Some(camel_guard) = effective.get("camel_guard").and_then(|v| v.as_table()) {
+        if let Some(enabled) = camel_guard.get("enabled").and_then(|v| v.as_bool())
+            && !enabled
+        {
+            mode = CamelGuardMode::Off;
+        } else if let Some(mode_raw) = camel_guard.get("mode").and_then(|v| v.as_str()) {
+            mode = CamelGuardMode::parse(mode_raw);
+        } else if camel_guard
+            .get("enabled")
+            .and_then(|v| v.as_bool())
+            .unwrap_or(false)
+        {
+            mode = CamelGuardMode::Monitor;
+        }
+
+        if let Some(cfg_threshold) = camel_guard.get("threshold").and_then(|v| v.as_integer()) {
+            let cfg_threshold = cfg_threshold.max(1) as u32;
+            threshold = cfg_threshold;
+        }
+    }
+
+    if let Some(env_mode) = mode_from_env_var() {
+        mode = env_mode;
+    }
+    if let Some(env_threshold) = threshold_from_env_var() {
+        threshold = env_threshold;
+    }
+
+    CamelGuardSettings { mode, threshold }
+}
+
+pub fn scan_user_inputs(input: &[UserInput], threshold: u32) -> Option<CamelGuardDetection> {
     let texts = input
         .iter()
         .filter_map(|item| match item {
@@ -65,10 +125,10 @@ pub fn scan_user_inputs(input: &[UserInput]) -> Option<CamelGuardDetection> {
             _ => None,
         })
         .collect::<Vec<_>>();
-    scan_texts(texts.iter().map(|s| s.as_ref()))
+    scan_texts_with_threshold(texts.iter().map(|s| s.as_ref()), threshold)
 }
 
-pub fn scan_response_items(items: &[ResponseItem]) -> Option<CamelGuardDetection> {
+pub fn scan_response_items(items: &[ResponseItem], threshold: u32) -> Option<CamelGuardDetection> {
     let mut texts: Vec<Cow<'_, str>> = Vec::new();
     for item in items {
         match item {
@@ -99,7 +159,7 @@ pub fn scan_response_items(items: &[ResponseItem]) -> Option<CamelGuardDetection
             _ => {}
         }
     }
-    scan_texts(texts.iter().map(|s| s.as_ref()))
+    scan_texts_with_threshold(texts.iter().map(|s| s.as_ref()), threshold)
 }
 
 fn collect_function_output_text<'a>(
@@ -125,7 +185,13 @@ pub fn scan_texts<'a, I>(texts: I) -> Option<CamelGuardDetection>
 where
     I: IntoIterator<Item = &'a str>,
 {
-    let threshold = threshold_from_env();
+    scan_texts_with_threshold(texts, threshold_from_env())
+}
+
+pub fn scan_texts_with_threshold<'a, I>(texts: I, threshold: u32) -> Option<CamelGuardDetection>
+where
+    I: IntoIterator<Item = &'a str>,
+{
     let mut score: u32 = 0;
     let mut reasons: Vec<&'static str> = Vec::new();
     let mut excerpt: Option<String> = None;
@@ -258,6 +324,6 @@ mod tests {
             end_turn: None,
             phase: None,
         }];
-        assert!(scan_response_items(&items).is_some());
+        assert!(scan_response_items(&items, DEFAULT_THRESHOLD).is_some());
     }
 }

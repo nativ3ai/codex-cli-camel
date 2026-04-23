@@ -798,6 +798,23 @@ impl ConfigEditsBuilder {
         self
     }
 
+    /// Set top-level `[camel_guard]` settings.
+    pub fn set_camel_guard(mut self, enabled: bool, mode: &str, threshold: u32) -> Self {
+        self.edits.push(ConfigEdit::SetPath {
+            segments: vec!["camel_guard".to_string(), "enabled".to_string()],
+            value: value(enabled),
+        });
+        self.edits.push(ConfigEdit::SetPath {
+            segments: vec!["camel_guard".to_string(), "mode".to_string()],
+            value: value(mode),
+        });
+        self.edits.push(ConfigEdit::SetPath {
+            segments: vec!["camel_guard".to_string(), "threshold".to_string()],
+            value: value(i64::from(threshold.max(1))),
+        });
+        self
+    }
+
     pub fn with_edits<I>(mut self, edits: I) -> Self
     where
         I: IntoIterator<Item = ConfigEdit>,

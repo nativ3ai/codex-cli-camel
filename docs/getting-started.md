@@ -1,3 +1,35 @@
-# Getting started with Codex CLI
+# Getting started with codex-cli-camel
 
-For an overview of Codex CLI features, see [this documentation](https://developers.openai.com/codex/cli/features#running-in-interactive-mode).
+## 1. Build and run
+
+```bash
+git clone https://github.com/nativ3ai/codex-cli-camel.git
+cd codex-cli-camel/codex-rs
+cargo run -p codex-cli --
+```
+
+## 2. Enable CaMeL guard
+
+```bash
+codex camel activate --mode monitor --threshold 6
+codex camel status
+```
+
+## 3. Validate against malicious samples
+
+```bash
+codex camel compare
+python3 ../benchmarks/camel_guard/benchmark.py
+```
+
+## 4. Move to enforcement
+
+```bash
+codex camel activate --mode enforce --threshold 6
+```
+
+If needed, disable quickly:
+
+```bash
+codex camel deactivate
+```
