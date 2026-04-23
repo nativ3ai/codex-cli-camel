@@ -66,7 +66,11 @@ Prompt-injection resistance principle:
 ```bash
 npm install -g codex-camel
 codex --version
+codex-camel --version
 ```
+
+If `codex` is already owned by another package (for example `@openai/codex`), use `codex-camel` explicitly.
+Both binaries point to this fork when `codex-camel` owns the shim.
 
 ### Build from source
 
@@ -97,6 +101,11 @@ codex --help
 codex camel monitor --threshold 6
 codex camel enforce --threshold 6
 codex camel off
+
+# Collision-safe equivalent commands:
+codex-camel camel monitor --threshold 6
+codex-camel camel enforce --threshold 6
+codex-camel camel off
 
 # Check effective settings (env vars override config)
 codex camel status

@@ -1,12 +1,15 @@
 # npm Release (`codex-camel`)
 
-This fork ships as package name `codex-camel` with global binary `codex`.
+This fork ships as package name `codex-camel` with global binaries:
+- `codex`
+- `codex-camel`
 
 ## User install
 
 ```bash
 npm install -g codex-camel
 codex --version
+codex-camel --version
 ```
 
 ## Maintainer publish flow

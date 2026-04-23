@@ -5,7 +5,10 @@
 ```bash
 npm install -g codex-camel
 codex --help
+codex-camel --help
 ```
+
+If `codex` resolves to another installation, run all commands with `codex-camel`.
 
 Alternative (from source):
 

@@ -7,7 +7,10 @@ This page is for the **fork** at `nativ3ai/codex-cli-camel`.
 ```bash
 npm install -g codex-camel
 codex --version
+codex-camel --version
 ```
+
+If your system already has another `codex` binary earlier in `PATH`, use `codex-camel` directly.
 
 ### System requirements
 
