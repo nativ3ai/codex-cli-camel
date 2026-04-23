@@ -41,6 +41,10 @@ mod wsl_paths;
 
 use crate::mcp_cmd::McpCli;
 
+use codex_core::camel_guard::CAMEL_GUARD_MODE_ENV;
+use codex_core::camel_guard::CAMEL_GUARD_THRESHOLD_ENV;
+use codex_core::camel_guard::CamelGuardMode;
+use codex_core::camel_guard::scan_texts;
 use codex_core::config::Config;
 use codex_core::config::ConfigOverrides;
 use codex_core::config::edit::ConfigEditsBuilder;
@@ -143,6 +147,9 @@ enum Subcommand {
 
     /// Inspect feature flags.
     Features(FeaturesCli),
+
+    /// CaMeL guard utilities (status + payload scan).
+    Camel(CamelCli),
 }
 
 #[derive(Debug, Parser)]
@@ -522,6 +529,26 @@ struct FeatureSetArgs {
     feature: String,
 }
 
+#[derive(Debug, Parser)]
+struct CamelCli {
+    #[command(subcommand)]
+    sub: CamelSubcommand,
+}
+
+#[derive(Debug, Parser)]
+enum CamelSubcommand {
+    /// Print effective CaMeL guard mode and threshold from environment.
+    Status,
+    /// Scan a payload string with the core CaMeL detector.
+    Scan(CamelScanArgs),
+}
+
+#[derive(Debug, Parser)]
+struct CamelScanArgs {
+    /// Text payload to scan. If omitted, reads from stdin.
+    payload: Option<String>,
+}
+
 fn stage_str(stage: codex_core::features::Stage) -> &'static str {
     use codex_core::features::Stage;
     match stage {
@@ -807,8 +834,51 @@ async fn cli_main(codex_linux_sandbox_exe: Option<PathBuf>) -> anyhow::Result<()
                 disable_feature_in_config(&interactive, &feature).await?;
             }
         },
+        Some(Subcommand::Camel(camel_cli)) => {
+            run_camel_cli(camel_cli)?;
+        }
     }
 
+    Ok(())
+}
+
+fn run_camel_cli(cli: CamelCli) -> anyhow::Result<()> {
+    match cli.sub {
+        CamelSubcommand::Status => {
+            let mode = CamelGuardMode::from_env();
+            let threshold = codex_core::camel_guard::threshold_from_env();
+            println!(
+                "CaMeL guard status: mode={} threshold={} (env: {}, {})",
+                mode.as_str(),
+                threshold,
+                CAMEL_GUARD_MODE_ENV,
+                CAMEL_GUARD_THRESHOLD_ENV
+            );
+        }
+        CamelSubcommand::Scan(args) => {
+            let payload = match args.payload {
+                Some(text) => text,
+                None => {
+                    use std::io::Read as _;
+                    let mut buf = String::new();
+                    std::io::stdin().read_to_string(&mut buf)?;
+                    buf
+                }
+            };
+            let detection = scan_texts([payload.as_str()]);
+            if let Some(d) = detection {
+                println!(
+                    "DETECTED score={}/{} reasons={} excerpt=\"{}\"",
+                    d.score,
+                    d.threshold,
+                    d.reasons.join(", "),
+                    d.excerpt.unwrap_or_default().replace('\n', " ")
+                );
+            } else {
+                println!("CLEAN no CaMeL rule hit above threshold");
+            }
+        }
+    }
     Ok(())
 }
 

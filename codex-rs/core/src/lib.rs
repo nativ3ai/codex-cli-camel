@@ -10,6 +10,7 @@ pub mod api_bridge;
 mod apply_patch;
 pub mod auth;
 pub mod bash;
+pub mod camel_guard;
 mod client;
 mod client_common;
 pub mod codex;

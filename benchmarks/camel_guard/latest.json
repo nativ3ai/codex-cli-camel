@@ -1,0 +1,45 @@
+{
+  "samples": 6,
+  "threshold": 6,
+  "accuracy": 1.0,
+  "blocked": 3,
+  "throughput_samples_per_sec": 529431.3,
+  "predictions": [
+    {
+      "id": "safe-1",
+      "score": 0,
+      "prediction": "allow",
+      "expected": "allow"
+    },
+    {
+      "id": "safe-2",
+      "score": 0,
+      "prediction": "allow",
+      "expected": "allow"
+    },
+    {
+      "id": "attack-1",
+      "score": 9,
+      "prediction": "block",
+      "expected": "block"
+    },
+    {
+      "id": "attack-2",
+      "score": 15,
+      "prediction": "block",
+      "expected": "block"
+    },
+    {
+      "id": "safe-3",
+      "score": 0,
+      "prediction": "allow",
+      "expected": "allow"
+    },
+    {
+      "id": "attack-3",
+      "score": 6,
+      "prediction": "block",
+      "expected": "block"
+    }
+  ]
+}

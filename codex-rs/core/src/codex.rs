@@ -94,6 +94,10 @@ use tracing::trace_span;
 use tracing::warn;
 
 use crate::ModelProviderInfo;
+use crate::camel_guard::CamelGuardMode;
+use crate::camel_guard::format_detection_message;
+use crate::camel_guard::scan_response_items;
+use crate::camel_guard::scan_user_inputs;
 use crate::client::ModelClient;
 use crate::client::ModelClientSession;
 use crate::client_common::Prompt;
@@ -3372,6 +3376,34 @@ pub(crate) async fn run_turn(
         return None;
     }
 
+    let guard_mode = CamelGuardMode::from_env();
+    if guard_mode != CamelGuardMode::Off
+        && let Some(detection) = scan_user_inputs(&input)
+    {
+        let message =
+            format_detection_message("CaMeL guard detected prompt-injection risk", &detection);
+        match guard_mode {
+            CamelGuardMode::Monitor => {
+                sess.send_event(&turn_context, EventMsg::Warning(WarningEvent { message }))
+                    .await;
+            }
+            CamelGuardMode::Enforce => {
+                sess.send_event(
+                    &turn_context,
+                    EventMsg::Error(ErrorEvent {
+                        message: format!(
+                            "{message} Turn was blocked because CODEX_CAMEL_GUARD_MODE=enforce."
+                        ),
+                        codex_error_info: None,
+                    }),
+                )
+                .await;
+                return None;
+            }
+            CamelGuardMode::Off => {}
+        }
+    }
+
     let model_info = turn_context.client.get_model_info();
     let auto_compact_limit = model_info.auto_compact_token_limit().unwrap_or(i64::MAX);
     let total_usage_tokens = sess.get_total_token_usage().await;
@@ -3720,6 +3752,28 @@ async fn run_sampling_request(
     tool_selection: SamplingRequestToolSelection<'_>,
     cancellation_token: CancellationToken,
 ) -> CodexResult<SamplingRequestResult> {
+    let guard_mode = CamelGuardMode::from_env();
+    if guard_mode != CamelGuardMode::Off
+        && let Some(detection) = scan_response_items(&input)
+    {
+        let message = format_detection_message(
+            "CaMeL guard detected suspicious context before sampling",
+            &detection,
+        );
+        match guard_mode {
+            CamelGuardMode::Monitor => {
+                sess.send_event(&turn_context, EventMsg::Warning(WarningEvent { message }))
+                    .await;
+            }
+            CamelGuardMode::Enforce => {
+                return Err(CodexErr::InvalidRequest(format!(
+                    "{message} Turn blocked because CODEX_CAMEL_GUARD_MODE=enforce."
+                )));
+            }
+            CamelGuardMode::Off => {}
+        }
+    }
+
     let mut mcp_tools = sess
         .services
         .mcp_connection_manager
