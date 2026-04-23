@@ -2,7 +2,7 @@
 
 The standalone plugin lives in a separate repository:
 
-- `../codex-cli-camel-plugin`
+- https://github.com/nativ3ai/codex-cli-camel-plugin
 - plugin id: `codex-camel-guard`
 
 ## Why both plugin and core fork
@@ -13,3 +13,8 @@ The standalone plugin lives in a separate repository:
 ## Install and use
 
 See plugin repo README for installation details and hook behavior.
+
+Core hook references:
+
+- Codex Hooks docs: https://developers.openai.com/codex/hooks
+- Codex Plugins docs: https://developers.openai.com/codex/plugins/build
