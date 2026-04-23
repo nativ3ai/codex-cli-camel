@@ -27,6 +27,37 @@ This implementation is based on Google DeepMind's CaMeL work and adapted to Code
 - Google research repository:  
   https://github.com/google-research/camel-prompt-injection
 
+## How CaMeL works here (node mapping)
+
+```mermaid
+flowchart TD
+    A[Trusted Operator Prompt] --> B[Trusted Intent Channel]
+    U[Untrusted Data: tool output/files/web text] --> C[Untrusted Evidence Channel]
+    B --> D[Runtime Context]
+    C --> D
+    D --> E[CaMeL Guard Gate]
+    E --> F{Sensitive action requested?}
+    F -- No --> G[Allow normal flow]
+    F -- Yes --> H{Authorized by trusted intent?}
+    H -- Yes --> I[Allow sensitive action]
+    H -- No --> J{Mode}
+    J -- monitor --> K[Policy alert + continue]
+    J -- enforce --> L[Block action]
+    K --> G
+    I --> G
+    L --> M[Safe blocked response]
+
+    N[Control knobs] --> O[codex camel activate --mode monitor|enforce --threshold N]
+    N --> P[CODEX_CAMEL_GUARD_MODE]
+    N --> Q[CODEX_CAMEL_GUARD_THRESHOLD]
+    O --> E
+    P --> J
+    Q --> E
+```
+
+Prompt-injection resistance principle:
+- instructions inside untrusted channels are treated as evidence, never as authority for sensitive actions.
+
 ## Install (this fork)
 
 ### npm (global, one line)
