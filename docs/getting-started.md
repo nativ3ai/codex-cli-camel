@@ -22,6 +22,11 @@ codex camel monitor --threshold 6
 codex camel status
 ```
 
+`threshold` is the score cutoff for triggering CaMeL policy action (`score >= threshold`).
+- lower = stricter
+- higher = looser
+- `6` is the current benchmark baseline
+
 ## 3. Validate against malicious samples
 
 ```bash

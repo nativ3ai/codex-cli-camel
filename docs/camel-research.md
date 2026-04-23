@@ -30,6 +30,12 @@ This fork applies Google's CaMeL methodology to Codex CLI runtime boundaries.
 | Guard mode | `codex camel monitor`, `codex camel enforce`, `codex camel off` or `CODEX_CAMEL_GUARD_MODE` | `off`, `monitor`, `enforce` |
 | Guard threshold | `codex camel monitor --threshold ...` / `codex camel enforce --threshold ...` or `CODEX_CAMEL_GUARD_THRESHOLD` | Integer score threshold |
 
+Threshold semantics:
+- guard calculates a risk score from injection indicators
+- action triggers when `score >= threshold`
+- lower threshold = stricter policy, higher threshold = looser policy
+- benchmark baseline in this repo uses `threshold = 6`
+
 ## Detection Philosophy
 
 This fork uses a deterministic weighted policy for low overhead and repeatable operations while preserving CaMeL's core objective: reduce instruction-override success by enforcing policy boundaries between trusted instructions and untrusted channels.

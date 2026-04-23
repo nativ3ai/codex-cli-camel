@@ -114,6 +114,17 @@ export CODEX_CAMEL_GUARD_MODE=monitor   # off | monitor | enforce
 export CODEX_CAMEL_GUARD_THRESHOLD=6
 ```
 
+### What `threshold` does
+
+- The guard computes a risk score from suspicious injection patterns.
+- `threshold` is the cutoff for triggering guard action.
+- If `score >= threshold`:
+  - `monitor`: warn and continue
+  - `enforce`: block
+- Lower threshold = stricter (more detections, higher false-positive risk).
+- Higher threshold = looser (fewer false positives, higher miss risk).
+- Recommended default: `6` (current benchmark baseline).
+
 ## Malicious prompt behavior
 
 ### Monitor mode
